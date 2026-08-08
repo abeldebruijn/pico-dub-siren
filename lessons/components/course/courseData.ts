@@ -101,6 +101,30 @@ export const lessonTwelveDoneItems = [
   { id: "common-c-unused", label: "Common C and contacts 6–10 remain disconnected." },
 ] as const;
 
+export const lessonThirteenDoneItems = [
+  { id: "dc-jack-empty", label: "The module's DC jack stayed empty." },
+  { id: "vbus-powers-module", label: "Pico VBUS powered the module's 5V header input." },
+  { id: "bck-lrck-din-wired", label: "BCK, LRCK, and DIN reached GP16, GP17, and GP18." },
+  { id: "heard-three-tones", label: "You heard a low, middle, and high tone." },
+  { id: "both-channels-tested", label: "Both left and right outputs were tested." },
+] as const;
+
+export const lessonFourteenDoneItems = [
+  { id: "heard-five-pitches", label: "You heard all five pitch steps." },
+  { id: "pitches-lasted-one-second", label: "Each pitch lasted approximately one second." },
+  { id: "crackling-gone", label: "The repeated crackling disappeared." },
+  { id: "explain-underrun", label: "You understand what an I²S buffer underrun is." },
+  { id: "explain-prepare-before-play", label: "You understand why preparation happens before playback." },
+] as const;
+
+export const lessonFifteenDoneItems = [
+  { id: "one-shared-pico", label: "The five-pot mux build and the I²S audio build share one Pico and one breadboard." },
+  { id: "din-moved-gp21", label: "You can explain why DIN moved from GP18 to GP21." },
+  { id: "rotary-on-breadboard", label: "The CK1050 rotary selector is wired onto the real breadboard, not just the schematic." },
+  { id: "mux-led-stay-responsive", label: "The mux scan and LED stay responsive between tone plays." },
+  { id: "heard-tone-on-press", label: "You heard the Mod-Type-selected tone play on a Trigger press." },
+] as const;
+
 export const lessons = [
   ["Make your first light blink", "Wire one safe LED path, then make the Pico pulse it with MicroPython."],
   ["Control the light with a button", "Compare momentary and toggle behavior with one button."],
@@ -114,6 +138,9 @@ export const lessons = [
   ["Add a third dial to the switch chip", "Expand the switch chip to a third control."],
   ["Add feedback and tempo dials", "Finish the switch chip with feedback and tempo controls."],
   ["Read the Mod Type selector", "Wire a five-position rotary switch to select modulation shapes."],
+  ["Hear three tones from a second Pico", "Wire a second Pico 2 to the RCA Module 13.2's DAC over I²S and hear three test tones."],
+  ["Keep prepared tones playing", "Prepare tone blocks before playback starts so five pitches stream without crackling."],
+  ["Merge both builds onto one Pico", "Combine the five-pot mux build and the I²S audio build on one shared Pico and breadboard."],
 ] as const;
 
 export function lessonSlug(number: number) {

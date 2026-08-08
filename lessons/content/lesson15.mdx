@@ -1,0 +1,102 @@
+---
+title: Merge both builds onto one Pico
+description: Combine the five-pot mux build and the I²S audio build on one shared Pico and breadboard, moving DIN off the mux's S0 pin.
+---
+
+<LessonGate prerequisite="lesson-014">
+
+Lessons 1–12 built one breadboard: a Trigger button, an LED, five potentiometers through a CD74HC4051 switch chip, and a CK1050 rotary Mod Type selector. Lessons 13–14 built a second, separate breadboard: a Pico 2 sending digital audio to the RCA Module 13.2 over I²S. Today both builds move onto the same physical Pico and the same breadboard.
+
+:::info Why this lesson exists
+A finished dub siren has one Pico, not two. Lesson 13 deliberately used a spare test Pico so a wiring mistake could never disturb the working mux circuit. That safety net is no longer needed — the mux circuit is proven, and the I²S wiring is proven. Merging them is the last step before the siren can read a control and make a sound with the same brain.
+:::
+
+## 1. The one pin conflict
+
+Lesson 13 wired I²S DIN to `GP18`. But on the main breadboard, `GP18` has been the 4051's S0 select line since lesson 8. Two different signals cannot share one GPIO, so DIN must move.
+
+`GP21`, physical pin 27, is free on the main Pico — it is not used by the button, the LED, the mux, its five channel-select bits, or the rotary selector. This is **the only wiring change from lesson 13**: DIN moves from `GP18` to `GP21` specifically because `GP18` is already claimed as the mux's S0 select line on this shared Pico.
+
+| Signal | Lessons 13–14 | Lesson 15 |
+| --- | --- | --- |
+| BCK | GP16, physical pin 21 | GP16, physical pin 21 — unchanged |
+| LRCK | GP17, physical pin 22 | GP17, physical pin 22 — unchanged |
+| DIN | GP18, physical pin 24 | **GP21, physical pin 27** |
+
+:::details Predict
+Why couldn't DIN simply stay on GP18 and the mux's S0 move instead?
+
+Either pin reassignment would work electrically. This course keeps S0 on GP18 because every mux lesson since lesson 8 already documents and tests that pin; moving DIN is the smaller, more isolated change, and GP21 was sitting unused.
+:::
+
+## 2. Wire the merge with USB unplugged
+
+1. Unplug the Pico's USB cable. Leave the RCA module's DC jack empty — the same VBUS-only power rule from lesson 13 still applies.
+2. Keep every lesson 1–12 connection on the main breadboard exactly as it is: button, LED, resistor, five potentiometers, the 4051, and its three select lines on GP18/GP19/GP20.
+3. Add the CK1050 rotary switch to this same breadboard for the first time. Lesson 12 only drew it as a schematic; today its common A and contacts 1–5 become real wires:
+   - Common **A** → shared **GND**.
+   - Contact **1 → GP2**, contact **2 → GP3**, contact **3 → GP4**, contact **4 → GP5**, contact **5 → GP6**.
+   - Common **C** and contacts 6–10 stay unconnected, exactly as in lesson 12.
+4. Add the RCA Module 13.2 to this same breadboard, moving DIN as described above:
+   - Pico **GP16**, physical pin 21 → module **BCK**, M-Bus pin 22.
+   - Pico **GP17**, physical pin 22 → module **LRCK**, M-Bus pin 24.
+   - Pico **GP21**, physical pin 27 → module **DIN**, M-Bus pin 23.
+   - Pico **GND** → module **GND**, M-Bus pin 1.
+   - Pico **VBUS**, physical pin 40 → module **5V**, M-Bus pin 28.
+
+<LessonFifteenCircuit />
+
+:::danger One 5V rail, still
+The RCA module's DC jack accepts 9–24 V; its onboard converter makes 5 V. Powering the Pico by USB and feeding VBUS into the module's 5V header is the only supply this build uses. Never plug in the DC jack while VBUS is also connected — two supplies driving one 5V rail can damage the module.
+:::
+
+:::danger Before reconnecting USB
+Recount GP18 on the Pico pinout before trusting any wire near it. GP18 (physical pin 24) still belongs to the mux's S0 line; GP21 (physical pin 27) is three pins further along and carries DIN. Confirm the CK1050's common A lands on GND, not on 3V3 — the selector still relies on the Pico's internal pull-ups, exactly as in lesson 12.
+:::
+
+## 3. Merge the code
+
+The combined `main.py` keeps three subsystems that were previously separate programs:
+
+- The five-pot mux scan, Trigger button, and LED from lesson 11.
+- The rotary Mod Type selector read from lesson 12.
+- The prepared I²S tone blocks from lesson 14, with `sd=Pin(21)` in place of `sd=Pin(18)`.
+
+<LessonFifteenCodeDiff />
+
+### Why the selected tone plays on Trigger, not continuously
+
+`audio.write()` is a blocking call — the Pico cannot scan the mux or update the LED while a tone is being written to the DAC. Lesson 14 already said a later lesson would introduce an efficient real-time oscillator; this is not that lesson. Instead, the two subsystems are kept honest and separate: the mux scan and LED stay fully responsive whenever no tone is playing, and a fresh Trigger press plays one short block from the tone selected by the rotary switch. `REPEATS_PER_TRIGGER` is shortened from lesson 14's `REPEATS_PER_PITCH` (10, for a one-second demo tone) to `5`, so each press produces a roughly half-second hit and the mux briefly pauses rather than stalls.
+
+### Why the tone index comes from the rotary switch, not the Pitch pot
+
+Five prepared tone blocks exist because lesson 14 built exactly five — one per `PITCHES_HZ` entry. The rotary Mod Type selector also has exactly five positions. Reusing `mod_type` (0–4) as the index into `tones` needs no new hardware and no new math: turning the selector picks which prepared block plays next. The continuous Pitch pot still gets read and printed every scan; it is not yet connected to pitch selection, because sliding it would need a new tone prepared on the spot, and preparing a tone is exactly the slow work lesson 14 proved cannot happen while the DAC is playing.
+
+## 4. Test the merged build
+
+1. Reconnect USB and run the merged code.
+2. Watch the Shell print `Mod type`, `Pitch`, `Amount`, `Rate`, `Feedback`, and `Tempo` together, updating as before.
+3. Turn the rotary selector through all five positions. The printed Mod Type should change exactly as it did in lesson 12.
+4. Hold Trigger. The LED should flash at Rate's speed and Amount's brightness, exactly as it did in lesson 11.
+5. Press Trigger briefly. You should hear the tone for the currently selected Mod Type position, and the Shell's printed values should resume updating right after the tone stops.
+6. Turn the rotary selector to a different position and press Trigger again. A different pitch should play.
+
+:::details The Shell never gets to `Preparing tone blocks`
+Unplug USB and recheck BCK, LRCK, DIN, and the shared ground against the table in step 1. A stalled `I2S(...)` call usually means one of these four wires is missing or on the wrong pin.
+:::
+
+:::details Every button press plays the wrong pitch
+Check the CK1050's terminal labels against contacts 1–5, not a guessed clock position — the same mistake lesson 12 warned about. Then confirm `mod_names` and `PITCHES_HZ` still list five entries in the same order you expect.
+:::
+
+:::details The LED stutters or the mux values lag right after a tone
+This is expected, not a bug: `audio.write()` blocks the whole program for roughly `REPEATS_PER_TRIGGER × CHUNK_LENGTH_MS`. The scan and LED catch up as soon as the write loop finishes.
+:::
+
+:::details Nothing changed — this still looks like two separate builds
+Confirm both sets of wiring reach the same physical Pico and the same breadboard. If a second Pico or a second breadboard is still involved, this is not yet the lesson 15 circuit.
+:::
+
+<LessonFifteenChecklist />
+
+</LessonGate>

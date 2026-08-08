@@ -65,6 +65,21 @@
     "label": "12 · Read the Mod Type selector"
   },
   {
+    "type": "file",
+    "name": "lesson13",
+    "label": "13 · Hear three tones from a second Pico"
+  },
+  {
+    "type": "file",
+    "name": "lesson14",
+    "label": "14 · Keep prepared tones playing"
+  },
+  {
+    "type": "file",
+    "name": "lesson15",
+    "label": "15 · Merge both builds onto one Pico"
+  },
+  {
     "type": "dir-section-header",
     "name": "appendix",
     "label": "Appendix",

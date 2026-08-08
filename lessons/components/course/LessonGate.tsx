@@ -4,13 +4,16 @@ import {
   docsBase,
   lessonEightDoneItems,
   lessonElevenDoneItems,
+  lessonFifteenDoneItems,
   lessonFiveDoneItems,
   lessonFourDoneItems,
   lessonNineDoneItems,
   lessonOneDoneItems,
   lessonSevenDoneItems,
+  lessonFourteenDoneItems,
   lessonSixDoneItems,
   lessonTenDoneItems,
+  lessonThirteenDoneItems,
   lessonThreeDoneItems,
   lessonTwelveDoneItems,
   lessonTwoDoneItems,
@@ -30,6 +33,9 @@ const prerequisites = {
   "lesson-010": { items: lessonTenDoneItems, lesson: 10 },
   "lesson-011": { items: lessonElevenDoneItems, lesson: 11 },
   "lesson-012": { items: lessonTwelveDoneItems, lesson: 12 },
+  "lesson-013": { items: lessonThirteenDoneItems, lesson: 13 },
+  "lesson-014": { items: lessonFourteenDoneItems, lesson: 14 },
+  "lesson-015": { items: lessonFifteenDoneItems, lesson: 15 },
 } as const;
 
 export default function LessonGate({ children, prerequisite = "lesson-001" }: { children: ReactNode; prerequisite?: keyof typeof prerequisites }) {

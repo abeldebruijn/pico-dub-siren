@@ -3,13 +3,16 @@ import {
   docsBase,
   lessonEightDoneItems,
   lessonElevenDoneItems,
+  lessonFifteenDoneItems,
   lessonFiveDoneItems,
   lessonFourDoneItems,
   lessonNineDoneItems,
   lessonOneDoneItems,
   lessonSevenDoneItems,
+  lessonFourteenDoneItems,
   lessonSixDoneItems,
   lessonTenDoneItems,
+  lessonThirteenDoneItems,
   lessonThreeDoneItems,
   lessonTwelveDoneItems,
   lessonTwoDoneItems,
@@ -32,13 +35,16 @@ export default function CourseOverview() {
   const lessonTenDone = isLessonDone(progress, "lesson-010", lessonTenDoneItems.map(({ id }) => id));
   const lessonElevenDone = isLessonDone(progress, "lesson-011", lessonElevenDoneItems.map(({ id }) => id));
   const lessonTwelveDone = isLessonDone(progress, "lesson-012", lessonTwelveDoneItems.map(({ id }) => id));
+  const lessonThirteenDone = isLessonDone(progress, "lesson-013", lessonThirteenDoneItems.map(({ id }) => id));
+  const lessonFourteenDone = isLessonDone(progress, "lesson-014", lessonFourteenDoneItems.map(({ id }) => id));
+  const lessonFifteenDone = isLessonDone(progress, "lesson-015", lessonFifteenDoneItems.map(({ id }) => id));
 
   return (
     <section className="course-roadmap" aria-label="Course lessons">
       <header className="course-roadmap__header">
         <div>
           <p className="course-eyebrow">Pico Dub Siren</p>
-          <h2>Twelve small circuits</h2>
+          <h2>Fifteen small circuits</h2>
           <p>Each lesson adds one useful control. Finish a lesson’s checklist to unlock the next circuit.</p>
         </div>
         {Object.keys(progress).length > 0 ? (
@@ -52,9 +58,9 @@ export default function CourseOverview() {
         {lessons.map(([title, subtitle], index) => {
           const number = index + 1;
           const slug = lessonSlug(number);
-          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone) || (number === 5 && lessonFiveDone) || (number === 6 && lessonSixDone) || (number === 7 && lessonSevenDone) || (number === 8 && lessonEightDone) || (number === 9 && lessonNineDone) || (number === 10 && lessonTenDone) || (number === 11 && lessonElevenDone) || (number === 12 && lessonTwelveDone);
-          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone) || (number === 6 && lessonFiveDone) || (number === 7 && lessonSixDone) || (number === 8 && lessonSevenDone) || (number === 9 && lessonEightDone) || (number === 10 && lessonNineDone) || (number === 11 && lessonTenDone) || (number === 12 && lessonElevenDone);
-          const contentReady = number <= 12;
+          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone) || (number === 5 && lessonFiveDone) || (number === 6 && lessonSixDone) || (number === 7 && lessonSevenDone) || (number === 8 && lessonEightDone) || (number === 9 && lessonNineDone) || (number === 10 && lessonTenDone) || (number === 11 && lessonElevenDone) || (number === 12 && lessonTwelveDone) || (number === 13 && lessonThirteenDone) || (number === 14 && lessonFourteenDone) || (number === 15 && lessonFifteenDone);
+          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone) || (number === 6 && lessonFiveDone) || (number === 7 && lessonSixDone) || (number === 8 && lessonSevenDone) || (number === 9 && lessonEightDone) || (number === 10 && lessonNineDone) || (number === 11 && lessonTenDone) || (number === 12 && lessonElevenDone) || (number === 13 && lessonTwelveDone) || (number === 14 && lessonThirteenDone) || (number === 15 && lessonFourteenDone);
+          const contentReady = number <= 15;
           const state = done ? "done" : available && contentReady ? "available" : "locked";
           const content = (
             <>

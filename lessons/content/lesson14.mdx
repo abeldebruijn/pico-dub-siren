@@ -1,0 +1,118 @@
+---
+title: Keep prepared tones playing
+description: Prepare small audio blocks first, then stream them without asking MicroPython to calculate sine waves during playback.
+---
+
+<LessonGate prerequisite="lesson-013">
+
+Prepare small audio blocks first, then stream them without asking MicroPython to calculate sine waves during playback. Today's wiring does not change at all — only the code changes, so hear 220, 330, 440, 660, and 880 Hz as one clean stream without background crackling.
+
+## 1. Keep the proven hardware
+
+Do not change the lesson 13 wiring:
+
+- GP16 → BCK, M-Bus pin 22
+- GP17 → LRCK, M-Bus pin 24
+- GP18 → DIN, M-Bus pin 23
+- Pico GND → module GND
+- Pico VBUS → module 5V; DC jack empty
+
+<LessonThirteenCircuit />
+
+## 2. Audio has a deadline
+
+At 44,100 Hz, the DAC needs 44,100 new stereo frames every second. If the Pico does not deliver them in time, the I²S buffer becomes empty. This is called a **buffer underrun**.
+
+prepared samples → I²S buffer → PCM5102A → speaker
+
+An underrun creates a tiny interruption. Many interruptions sound like crackling or harsh background noise.
+
+:::danger What the first lesson 14 code taught us
+Calculating `sin()` for every sample while I²S was already playing was too slow in MicroPython. The sample rate was correct; the audio-producing code missed its deadlines.
+:::
+
+## 3. Prepare before pressing play
+
+The corrected program creates five tone blocks before it creates the I²S output:
+
+```python
+print("Preparing tone blocks")
+tones = []
+
+for frequency_hz in PITCHES_HZ:
+    tones.append(make_tone(frequency_hz))
+
+audio = I2S(...)
+```
+
+`tones` is a list containing five arrays. Each array holds 100 ms of one pitch. Sine calculations may take some time here, but that cannot interrupt playback because playback has not started yet.
+
+:::details Predict
+Why do we create `audio = I2S(...)` after preparing the arrays?
+
+The DAC does not start waiting for samples until the expensive preparation work is finished.
+:::
+
+## 4. Make each block repeat cleanly
+
+A 100 ms block is one tenth of a second. These pitches complete whole numbers of cycles in that time:
+
+| Pitch | Cycles in 100 ms |
+| --- | --- |
+| 220 Hz | 22 |
+| 330 Hz | 33 |
+| 440 Hz | 44 |
+| 660 Hz | 66 |
+| 880 Hz | 88 |
+
+The end of each block meets its beginning at the same sine-wave position. Repeating it therefore does not introduce a sudden jump.
+
+## 5. Play prepared data only
+
+<LessonFourteenCodeDiff />
+
+```python
+for frequency_hz, tone in zip(PITCHES_HZ, tones):
+    print("Pitch:", frequency_hz, "Hz")
+
+    for _ in range(REPEATS_PER_PITCH):
+        audio.write(tone)
+```
+
+`zip()` pairs each printed frequency with its prepared array:
+
+```text
+220  <-> first tone array
+330  <-> second tone array
+440  <-> third tone array
+660  <-> fourth tone array
+880  <-> fifth tone array
+```
+
+Each array represents 100 ms. Writing it ten times produces one second:
+
+```text
+100 ms x 10 = 1,000 ms
+```
+
+## 6. Listen and test
+
+1. Begin with speaker volume low.
+2. Run the corrected lesson 14 code.
+3. Wait while the Shell says `Preparing tone blocks`.
+4. Listen for five pitches of approximately one second each.
+5. Compare the background with the previous noisy version.
+
+:::details I still hear a little steady hiss
+Stop the program but leave the powered speaker connected at the same volume. If the hiss remains, it comes from the speaker gain, analogue cable, or power — not from I²S generation.
+:::
+
+:::details I still hear regular crackling
+Run the continuous 440 Hz diagnostic from lesson 13. If that tone is clean, send your teaching agent a new recording of the corrected lesson 14 program.
+:::
+
+A later lesson will introduce an efficient real-time oscillator suitable for the dub siren's live controls; today's win is clear, reliable playback from prepared blocks.
+
+<LessonFourteenChecklist />
+
+</LessonGate>

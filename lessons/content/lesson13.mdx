@@ -1,0 +1,126 @@
+---
+title: Hear three tones from a second Pico
+description: Wire a separate Pico 2 to the RCA Module 13.2's PCM5102A DAC over I²S and hear 220, 440, and 880 Hz.
+---
+
+<LessonGate prerequisite="lesson-012">
+
+This lesson starts a second, separate build: a dedicated Pico 2 sends digital audio to the RCA Module 13.2, an M5Stack board built around the PCM5102A DAC. It has no potentiometers, no multiplexer, and does not sit on the breadboard from lessons 1–12. The only goal today is to hear 220, 440, and 880 Hz.
+
+:::info A second Pico, a separate build
+Keep the lesson 1–12 breadboard exactly as it is. This lesson's Pico 2 is a different physical board — preferably a spare test Pico — dedicated to producing the siren's actual audio output.
+:::
+
+## 1. What the module does
+
+The Pico cannot send a sound wave directly to this module. It sends a stream of numbers over **I²S**. The module's PCM5102A converts those numbers into the analogue voltage that an amplifier can play.
+
+Pico numbers → I²S wires → PCM5102A → analogue audio
+
+Three I²S signals travel from the Pico:
+
+- **BCK — bit clock.** Marks the rhythm of the individual data bits.
+- **LRCK — left/right clock.** Marks whether the next sample belongs to the left or right channel. MicroPython calls this signal `ws`.
+- **DIN — data in.** Carries the sample numbers into the DAC. MicroPython calls the Pico's output pin `sd`.
+
+:::info Digital audio, not PWM
+These are three synchronized 3.3 V digital signals. Do not put an LED resistor, filter capacitor, or PWM output between the Pico and the module; the RCA board already contains the parts needed at its I²S inputs.
+:::
+
+:::details Predict before revealing
+Which device creates the final analogue audio voltage: the Pico or the PCM5102A?
+
+The PCM5102A. The Pico creates the sample numbers and transmits them digitally.
+:::
+
+## 2. The DC jack is optional here
+
+The module's DC jack accepts 9–24 V and its converter makes 5 V. TinyTronics also specifies 5 V operation through the pin header, and M5Stack's schematic shows that header on the module's 5 V rail. For this small test, we use the Pico's `VBUS` pin, which exposes the approximately 5 V arriving through USB.
+
+The header route is appropriate for this low-power audio test, but keeping the DC jack empty is essential: we do not want two supplies driving the same 5 V rail.
+
+:::info Use one power source
+Leave the RCA module's DC jack empty. Power the Pico by USB, then connect Pico `VBUS` to module `5V`. Connect their grounds too.
+:::
+
+:::danger Not the 3V3 pin
+Do not connect Pico `3V3 OUT` to the module's `5V` pin. Do not attach a 9–24 V adapter while the module is receiving VBUS in this lesson.
+:::
+
+## 3. Gather only these parts
+
+- **1 × Pico 2 H** — preferably the separate test Pico.
+- **1 × RCA Module 13.2** — M5Stack M125 with PCM5102A.
+- **5 × jumper wires** — use the ends that fit the Pico and M-Bus sockets.
+- **1 × USB data cable** — for power and running MicroPython.
+- **1 × audio cable** — 3.5 mm or stereo RCA.
+- **1 × listening device** — powered speaker, amplifier, or mixer.
+
+A breadboard can hold the Pico, but the RCA module does not need to sit on it. A passive speaker by itself is not enough; the module provides an audio signal, not loudspeaker power.
+
+## 4. Wire with USB unplugged
+
+1. Unplug USB from the Pico. Leave the module's DC jack empty.
+2. Connect Pico **GP16, physical pin 21** to module **BCK, M-Bus pin 22**.
+3. Connect Pico **GP17, physical pin 22** to module **LRCK, M-Bus pin 24**.
+4. Connect Pico **GP18, physical pin 24** to module **DIN, M-Bus pin 23**.
+5. Connect Pico **GND, physical pin 38** to module **GND, M-Bus pin 1**.
+6. Connect Pico **VBUS, physical pin 40** to module **5V, M-Bus pin 28**.
+7. Connect the white/red RCA outputs or 3.5 mm output to a powered speaker, amplifier, or mixer. Begin with its volume low.
+
+<LessonThirteenCircuit />
+
+:::danger Before reconnecting USB
+Read the labels printed by the module header. Confirm `VBUS → 5V` and `GND → GND`. If the M-Bus labels or pin-1 orientation are not clear on your board, stop and send your teaching agent a well-lit photo instead of guessing.
+:::
+
+## 5. Send three sine waves
+
+This audio lesson uses `machine.I2S`: `picozero` remains useful for LEDs, buttons, and pots, but it does not provide the digital-audio bus.
+
+<LessonThirteenCode />
+
+### Why the sample rate is 44,100 Hz
+
+This is a three-wire I²S connection: BCK, LRCK, and DIN. The PCM5102A therefore builds its missing master clock from BCK using an internal PLL. That mode supports standard rates such as 32,000, 44,100, and 48,000 Hz. It does not support 22,050 Hz, which leaves this module silent.
+
+### Why every sample appears twice
+
+`samples[frame * 2]` is left and `samples[frame * 2 + 1]` is right. Both receive the same number, so both audio sockets play the same test tone.
+
+### Why the tone is written in chunks
+
+A complete 700 ms stereo tone at 44,100 Hz needs about 123 KB of contiguous RAM. That is too much to allocate reliably on the Pico. The code builds only 100 ms — about 18 KB — and writes that same chunk seven times.
+
+### Why the amplitude is 8,000
+
+A signed 16-bit sample can approach 32,767. An amplitude of 8,000 is clearly audible while leaving plenty of headroom. Begin with the powered speaker volume low.
+
+## 6. Test the whole chain
+
+1. Turn the powered speaker or amplifier volume down.
+2. Reconnect the Pico's USB cable.
+3. Run `main.py`.
+4. Slowly raise the listening-device volume.
+5. Listen for three tones: low, middle, then high.
+6. Run it once through the left output and once through the right output if you use RCA cables.
+
+:::details `ImportError` mentions `I2S`
+Your Pico firmware does not expose `machine.I2S`. Install a current official MicroPython build for the Pico 2, then try again.
+:::
+
+:::details The Shell prints tones but I hear silence
+First check the listening device is amplified and uses an audio output, not the yellow video socket. Then unplug USB and recheck BCK, LRCK, DIN, and the shared ground. Finally confirm VBUS reaches the module's 5V header connection.
+:::
+
+:::details I hear harsh digital noise
+Stop the program and unplug USB. DIN and BCK may be exchanged, or LRCK may not reach GP17. Recheck by signal name rather than wire colour.
+:::
+
+:::details Only one RCA socket makes sound
+The code sends the same sample to left and right. Swap the RCA cables at the module. If the silent side moves, troubleshoot the cable or listening-device input; if it stays on the same module socket, send your teaching agent the result.
+:::
+
+<LessonThirteenChecklist />
+
+</LessonGate>
