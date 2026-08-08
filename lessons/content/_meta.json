@@ -40,6 +40,31 @@
     "label": "07 · Route pitch through the switch chip"
   },
   {
+    "type": "file",
+    "name": "lesson8",
+    "label": "08 · Share one input between two dials"
+  },
+  {
+    "type": "file",
+    "name": "lesson9",
+    "label": "09 · Keep timing responsive"
+  },
+  {
+    "type": "file",
+    "name": "lesson10",
+    "label": "10 · Add a third dial to the switch chip"
+  },
+  {
+    "type": "file",
+    "name": "lesson11",
+    "label": "11 · Add feedback and tempo dials"
+  },
+  {
+    "type": "file",
+    "name": "lesson12",
+    "label": "12 · Read the Mod Type selector"
+  },
+  {
     "type": "dir-section-header",
     "name": "appendix",
     "label": "Appendix",

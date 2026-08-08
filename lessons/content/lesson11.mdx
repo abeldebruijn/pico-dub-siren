@@ -1,0 +1,115 @@
+---
+title: Add feedback and tempo dials
+description: Add the fourth and fifth potentiometers, wire the third selector bit, and finish the eight-channel switch chip.
+---
+
+<LessonGate prerequisite="lesson-010">
+
+Add Feedback and Tempo—the fourth and fifth purchased B10K potentiometers—and finish wiring the 4051's third selector bit. All five dub siren controls will share GP28 by the end of this lesson.
+
+## 1. CH3 needs no new wire, CH4 needs one
+
+S2 is still grounded, and S1 plus S0 already give four combinations, so **Feedback on CH3** needs no new selector wire:
+
+| S2 | S1 | S0 | Channel | Control |
+| --- | --- | --- | --- | --- |
+| 0 | 0 | 0 | CH0 · pin 13 | Pitch |
+| 0 | 0 | 1 | CH1 · pin 14 | Amount |
+| 0 | 1 | 0 | CH2 · pin 15 | Rate |
+| 0 | 1 | 1 | CH3 · pin 12 | Feedback |
+| 1 | 0 | 0 | CH4 · pin 1 | Tempo |
+
+CH3 is binary `011`: S2 is 0, S1 is 1, S0 is 1. **Tempo on CH4** is the first channel whose S2 bit is 1: CH4 is binary `100`, so S2 goes high while S1 and S0 go low. GP20 will drive S2.
+
+:::info Channel number is not pin number
+CH4 is physical pin 1. The channel names describe the eight internal switches; the DIP pin numbers describe their physical positions around the chip.
+:::
+
+:::details Retrieve before wiring
+Calculate `3 & 1` and `(3 >> 1) & 1` for CH3, then `(4 >> 2) & 1` for CH4's S2 bit.
+
+`3 & 1 = 1` and `(3 >> 1) & 1 = 1`, so CH3 drives both selector outputs high. `100 >> 2 = 001`, then `001 & 001 = 001`, so CH4 drives S2 high.
+:::
+
+## 2. Wire both pots and the new selector bit in one pass
+
+Use the two remaining purchased B10K linear potentiometers, then move S2 off GND.
+
+1. Unplug the Pico's USB cable.
+2. Connect one outside Feedback leg to the shared 3V3 rail and the other to the shared GND rail.
+3. Connect the Feedback **centre wiper** to **4051 CH3 pin 12**.
+4. Connect one outside Tempo leg to shared 3V3 and the other to shared GND.
+5. Connect the Tempo **centre wiper** to **4051 CH4 pin 1**.
+6. Move **4051 S2 pin 9** away from GND and connect it to `GP20`.
+7. Keep S0 pin 11 on GP18 and S1 pin 10 on GP19.
+8. Keep every lesson 10 connection unchanged.
+
+<LessonElevenCircuit />
+
+:::danger Before reconnecting USB
+Pin 12 (CH3) sits between Pitch's CH0 pin 13 and selector S0 pin 11—do not connect Feedback's wiper to pin 11 by mistake. Pin 1 (CH4) is beside the pin-1 dot on the left side when the notch faces up; pin 16 is directly opposite on the right and carries 3V3. Recount from the notch before applying power.
+:::
+
+## 3. Extend the scheduled scan to five controls
+
+This keeps lesson 10's scheduled reading and adds two more scan steps, one for Feedback and one for Tempo:
+
+<LessonElevenCodeDiff />
+
+### The two new scan steps
+
+```python
+elif mux_channel == RATE_CHANNEL:
+    rate_value = reading
+    start_mux_read(FEEDBACK_CHANNEL)
+elif mux_channel == FEEDBACK_CHANNEL:
+    feedback_value = reading
+    start_mux_read(TEMPO_CHANNEL)
+```
+
+Lesson 10 ended the scan after Rate. This lesson chains two more reads instead: Feedback, then Tempo. Only after Tempo is read does the code schedule the next complete five-control scan.
+
+### The new S2 extraction
+
+```python
+mux_s2.value((channel >> 2) & 1)
+```
+
+Shift two positions so the S2 bit reaches the right edge, then mask it with `1`. For channels 0–3 this produces 0; for channel 4 it produces 1.
+
+:::info Why Feedback and Tempo have no LED effect yet
+Feedback will eventually control how much delayed audio returns into the delay input, and Tempo will control delay timing or a MIDI tempo-related parameter. There is no audio or delay engine yet, so this lesson only proves both controls can be read correctly. Rate still controls LED flash speed and Amount still controls LED brightness.
+:::
+
+## 4. Test all five controls independently
+
+1. Reconnect USB and run the code.
+2. Turn Tempo clockwise. Only Tempo should rise from about 40 to 200 BPM.
+3. Turn Feedback. Only Feedback should move from about 0.00 to 1.00.
+4. Turn Pitch. Only Pitch should make a large frequency change.
+5. Hold Trigger: Amount changes brightness and Rate changes flash speed.
+6. Leave every control still. Values should remain stable apart from tiny ADC changes.
+
+:::details Feedback works backwards
+Unplug USB and swap only Feedback's two outside wires. Keep the centre wiper on pin 12.
+:::
+
+:::details Feedback changes another value
+Check that its centre wiper reaches pin 12. Then recheck Pitch pin 13, Amount pin 14 and Rate pin 15.
+:::
+
+:::details Tempo changes Feedback instead
+Check Tempo's centre wiper reaches CH4 pin 1. Recheck Feedback's centre wiper remains on CH3 pin 12.
+:::
+
+:::details Tempo stays near 40 BPM
+First check S2 pin 9 reaches GP20. Then unplug USB and reseat all three Tempo wires.
+:::
+
+:::details Older controls stopped working
+Check S2 was moved to GP20—not S1 or S0. Recheck S0 pin 11 to GP18 and S1 pin 10 to GP19.
+:::
+
+<LessonElevenChecklist />
+
+</LessonGate>

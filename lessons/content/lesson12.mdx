@@ -1,0 +1,109 @@
+---
+title: Read the Mod Type selector
+description: Wire a five-position rotary switch as five active-low digital choices and print the selected modulation shape.
+---
+
+<LessonGate prerequisite="lesson-011">
+
+Wire a Lorlin CK1050 rotary switch as five digital choices and print the selected modulation shape. Turning the selector produces Mod Type 0, 1, 2, 3 or 4. No extra resistors and no extra 3V3 wire are needed.
+
+:::info Five-position CK1050, not six
+The original build notes for this switch describe a 2×6 CK1050 (two poles of six contacts). This course now uses the 2×5 variant instead — two poles of five contacts, ten terminals in total. Every position on pole A is used; nothing goes to waste, and there is no mechanical stop to adjust later.
+:::
+
+## 1. One common chooses one contact
+
+A rotary selector is different from a potentiometer. A pot produces a continuously changing voltage. This selector makes one direct electrical connection at a time.
+
+Your CK1050 contains two separate five-position switches, called **poles**:
+
+- Pole **A** connects common A to one of contacts 1–5.
+- Pole **C** connects common C to one of contacts 6–10.
+
+This lesson uses common A and contacts 1–5 only. Common C and its five contacts stay completely unconnected.
+
+<RotarySwitchDiagram />
+
+| Physical position | Contact | Pico | Printed value | Mod shape |
+| --- | --- | --- | --- | --- |
+| 1 | 1 | GP2 | 0 | Rising saw |
+| 2 | 2 | GP3 | 1 | Falling saw |
+| 3 | 3 | GP4 | 2 | Triangle |
+| 4 | 4 | GP5 | 3 | Sine |
+| 5 | 5 | GP6 | 4 | Square |
+
+:::details Predict
+If common A is wired to GND and the knob selects contact 3, which GPIO is connected to GND?
+
+GP4. Physical contact 3 is wired to GP4, so the code prints software value 2 and "Triangle".
+:::
+
+## 2. Wire one pole with USB unplugged
+
+1. Unplug the Pico's USB cable.
+2. Keep the complete lesson 11 circuit in place.
+3. Find the tiny terminal labels on the CK1050. Use the labels — not a guessed clock position.
+4. Connect selector common **A** to the Pico's shared **GND**.
+5. Connect contact **1 → GP2**.
+6. Connect contact **2 → GP3**.
+7. Connect contact **3 → GP4**.
+8. Connect contact **4 → GP5**.
+9. Connect contact **5 → GP6**.
+10. Leave common C and contacts 6–10 unconnected.
+
+:::danger No 3V3 on the selector
+The common goes to GND. Internal pull-ups inside the Pico provide the input's high state. Connecting 3V3 to a selector contact is unnecessary.
+:::
+
+:::details PCB terminals
+The CK1050 has short PCB pins. Do not force a loose Dupont connector onto them. Use secure soldered short wires or a suitable adapter so movement cannot create the faulty-cable behaviour you found earlier.
+:::
+
+## 3. Read five active-low inputs
+
+This diagnostic temporarily replaces the lesson 11 program so one new component is easy to understand.
+
+<LessonTwelveCode />
+
+<ModSelectorDemo />
+
+### Why an unselected input reads 1
+
+`Pin.PULL_UP` activates a weak resistor inside the Pico between that GPIO and 3.3 V. With no external connection, the resistor gently holds the input at logic 1.
+
+### Why the selected input reads 0
+
+The selector joins common A to one numbered contact. Because common A is connected to GND, the selected GPIO is pulled firmly to 0. This is called **active-low**: 0 means selected.
+
+### Why the code sometimes finds `None`
+
+The CK1050 is break-before-make. While moving between positions, it disconnects the old contact before connecting the new one. For a tiny moment all five GPIOs can read 1. The function then returns `None`, and the program keeps the last valid Mod Type.
+
+The 10 ms wait handles contact bounce: metal contacts can touch and release several times immediately after landing. The program waits, reads again, and accepts only a stable result.
+
+## 4. Test all five positions
+
+1. Reconnect USB and run the code.
+2. Turn fully anticlockwise. The Shell should print `Mod type: 0 Rising saw`.
+3. Move clockwise one click at a time. Expect values 1, 2, 3 and 4.
+4. Stop on each position and gently move the cable bundle. The value must remain stable.
+
+:::details Nothing prints in any position
+Check common A reaches GND. Make sure you used A, not common C. Then verify contacts 1–5 reach GP2–GP6.
+:::
+
+:::details One position never prints
+Unplug USB and reseat only that position's wire. Follow the mapping table: contact 1→GP2 through contact 5→GP6.
+:::
+
+:::details The order is reversed or scrambled
+The datasheet's contact map is a front view. A rear view is mirrored. Follow the moulded terminal numbers; if necessary, swap only the numbered contact wires until GP2–GP6 follow positions 1–5.
+:::
+
+:::details Two choices appear while turning
+That should not remain after the knob settles. Recheck that each GPIO wire reaches only one contact and inspect for touching bare wire or solder bridges.
+:::
+
+<LessonTwelveChecklist />
+
+</LessonGate>

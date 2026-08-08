@@ -1,0 +1,85 @@
+---
+title: Keep timing responsive
+description: Replace the blocking mux settle wait with a scheduled ticks_ms state machine so LED timing stays responsive.
+---
+
+<LessonGate prerequisite="lesson-008">
+
+Lesson 8 read Pitch, waited 2 ms, read Amount, waited 2 ms, then slept another 10 ms. That made one loop take at least about 14 ms. Today's wiring does not change at all—only the code changes, so the LED timing is checked far more often.
+
+## 1. The problem from lesson 8
+
+That timing is acceptable for learning the 4051, but it means fast LED timing is only checked once per loop. A requested 50 ms interval can become noticeably longer because the code checks late.
+
+## 2. The new idea
+
+Do not read every control on every loop. Instead:
+
+1. Set the 4051 to CH0.
+2. Keep looping while the ADC settles.
+3. After 2 ms, read Pitch.
+4. Set the 4051 to CH1.
+5. After another 2 ms, read Amount.
+6. Wait until the next control scan.
+
+The controls are slow human inputs, so scanning them every 20 ms is still responsive. The LED timing is checked much more often.
+
+:::info Important distinction
+`sleep(0.002)` stops the whole program for 2 ms. A scheduled wait remembers the start time, keeps looping, and only reads the ADC once 2 ms has passed.
+:::
+
+<BlockingVsScheduledDemo />
+
+## 3. Wiring stays the same
+
+| 4051 pin | Connects to |
+| --- | --- |
+| CH0 pin 13 | Pitch centre wiper |
+| CH1 pin 14 | Amount centre wiper |
+| COMMON pin 3 | GP28 |
+| S0 pin 11 | GP18 |
+| S1 / S2 | GND |
+
+<LessonEightCircuit />
+
+## 4. Run scheduled mux code
+
+<LessonNineCodeDiff />
+
+### Why `global` is needed here
+
+Variables such as `mux_waiting`, `mux_channel`, and `pitch_value` are created outside the functions. They hold the current state of the whole program: which mux channel is settling, what the latest knob values are, and when the next scan should happen.
+
+Inside a function, Python treats a name as local if you assign to it. So this line inside `start_mux_read()` would normally create a new private function variable:
+
+```python
+mux_waiting = True
+```
+
+That is not what we want. The main `while True` loop needs to see that `mux_waiting` changed. Writing `global mux_waiting` tells Python: "use the program-level variable, not a new private one."
+
+You only need `global` for names that the function assigns to. Reading a value usually does not need it. For example, `finish_mux_read()` reads `mux_channel` to decide whether the current value is Pitch or Amount, but it does not assign a new value to `mux_channel`, so `mux_channel` is not listed in that function's `global` line.
+
+### Why `ticks_add` and `ticks_diff` are used
+
+MicroPython tick counters eventually wrap around. `ticks_diff` compares times safely even near that wrap. `ticks_add` schedules a future tick safely.
+
+## 5. Test timing
+
+1. Turn Rate fully clockwise for the fastest flash.
+2. Hold Trigger. The LED should feel a bit closer to the earlier direct-pot lessons.
+3. Turn Pitch. The printed frequency should still change.
+4. Turn Amount. LED brightness should still change.
+5. Release Trigger. The LED should still stop immediately.
+
+:::details Pitch starts at 0 Hz-equivalent then catches up
+That is expected right after power-on: `pitch_value` starts at `0` and the first control scan has not completed yet. It settles to the real knob position within one `CONTROL_SCAN_MS` cycle.
+:::
+
+:::details Printing makes timing rough
+Printing to the shell can briefly slow the loop. For a final instrument, control changes should be sent only when needed, and debug printing should be removed.
+:::
+
+<LessonNineChecklist />
+
+</LessonGate>

@@ -61,6 +61,46 @@ export const lessonSevenDoneItems = [
   { id: "quiz-passed", label: "You scored full marks on the multiplexer quiz." },
 ] as const;
 
+export const lessonEightDoneItems = [
+  { id: "gp28-two-pots", label: "GP28 reads two different pots through the 4051." },
+  { id: "gp18-controls-s0", label: "GP18 controls S0." },
+  { id: "s1-s2-grounded", label: "S1 and S2 stay grounded." },
+  { id: "pitch-controls-frequency", label: "Pitch controls printed frequency." },
+  { id: "amount-controls-brightness", label: "Amount controls LED brightness." },
+] as const;
+
+export const lessonNineDoneItems = [
+  { id: "explain-blocking", label: "You can explain why blocking sleeps slow the whole loop." },
+  { id: "explain-scheduled", label: "You can explain why scheduled waits let other code keep running." },
+  { id: "mux-still-works", label: "Pitch and Amount still work through the 4051." },
+  { id: "flash-feels-faster", label: "The fastest LED flash feels less affected by mux reading." },
+] as const;
+
+export const lessonTenDoneItems = [
+  { id: "explain-two-bits", label: "You can explain why two selector bits offer four combinations." },
+  { id: "three-controls-through-common", label: "Pitch, Amount and Rate all travel through COMMON to GP28." },
+  { id: "gp18-gp19-drive-s0-s1", label: "GP18 drives S0 and GP19 drives S1." },
+  { id: "gp26-free", label: "GP26 is free." },
+  { id: "controls-stay-separate", label: "All three controls keep their separate jobs." },
+] as const;
+
+export const lessonElevenDoneItems = [
+  { id: "five-pots-share-gp28", label: "All five potentiometers share GP28." },
+  { id: "feedback-on-ch3", label: "Feedback’s centre wiper reaches CH3 pin 12." },
+  { id: "tempo-on-ch4", label: "Tempo’s centre wiper reaches CH4 pin 1." },
+  { id: "gp18-gp19-gp20-drive-selectors", label: "GP18, GP19 and GP20 drive S0, S1 and S2." },
+  { id: "explain-ch3-ch4-binary", label: "You know CH3 selects binary 011 and CH4 selects binary 100." },
+  { id: "all-five-independent", label: "All five controls remain independent." },
+] as const;
+
+export const lessonTwelveDoneItems = [
+  { id: "common-a-reaches-gnd", label: "Common A reaches GND." },
+  { id: "contacts-reach-gp2-gp6", label: "Contacts 1–5 reach GP2–GP6 in order." },
+  { id: "five-stable-mod-types", label: "The Shell prints five stable Mod Types, numbered 0–4." },
+  { id: "explain-active-low", label: "You can explain why selected means 0." },
+  { id: "common-c-unused", label: "Common C and contacts 6–10 remain disconnected." },
+] as const;
+
 export const lessons = [
   ["Make your first light blink", "Wire one safe LED path, then make the Pico pulse it with MicroPython."],
   ["Control the light with a button", "Compare momentary and toggle behavior with one button."],
@@ -72,8 +112,8 @@ export const lessons = [
   ["Share one Pico input between two dials", "Read two dials through one Pico analog input."],
   ["Keep timing responsive", "Keep the mux reading loop responsive."],
   ["Add a third dial to the switch chip", "Expand the switch chip to a third control."],
-  ["Add a feedback dial", "Add the feedback control for dub-siren character."],
-  ["Add a tempo dial", "Add the tempo control for rhythmic control."],
+  ["Add feedback and tempo dials", "Finish the switch chip with feedback and tempo controls."],
+  ["Read the Mod Type selector", "Wire a five-position rotary switch to select modulation shapes."],
 ] as const;
 
 export function lessonSlug(number: number) {

@@ -1128,6 +1128,120 @@ a.course-roadmap__lesson:hover {
   }
 }
 
+.course-rotary {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 24rem;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 1rem;
+  background: var(--rp-c-bg-soft);
+  text-align: center;
+}
+
+.course-rotary__header {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.course-rotary__header strong {
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.course-rotary__header span {
+  color: var(--rp-c-text-2);
+  font-size: 0.82rem;
+}
+
+.course-rotary svg {
+  width: 100%;
+  max-width: 18rem;
+  margin: 0 auto;
+}
+
+.course-rotary__outline {
+  fill: none;
+  stroke: var(--rp-c-text-1);
+  stroke-width: 3;
+}
+
+.course-rotary__ring {
+  fill: var(--rp-c-divider);
+  stroke: none;
+}
+
+.course-rotary__inner {
+  fill: var(--rp-c-bg);
+  stroke: var(--rp-c-text-2);
+  stroke-width: 1.5;
+}
+
+.course-rotary__hub {
+  fill: var(--rp-c-divider);
+  stroke: none;
+}
+
+.course-rotary__unused {
+  fill: var(--rp-c-bg);
+  stroke: var(--rp-c-text-2);
+  stroke-width: 1.5;
+}
+
+.course-rotary__common--a {
+  fill: var(--rp-c-text-1);
+}
+
+.course-rotary__label {
+  font: 700 0.95rem/1 var(--rp-font-family-mono, monospace);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.course-rotary__label--used {
+  fill: #fff;
+}
+
+.course-rotary__label--unused {
+  fill: var(--rp-c-text-1);
+}
+
+.course-rotary__legend {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.course-rotary__legend div {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.course-rotary__legend dt {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--rp-c-text-2);
+}
+
+.course-rotary__legend dd {
+  margin: 0;
+  font: 600 0.85rem var(--rp-font-family-mono, monospace);
+}
+
+.course-rotary__footnote {
+  margin: 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--rp-c-divider);
+  font-size: 0.78rem;
+  color: var(--rp-c-text-2);
+}
+
 .course-code {
   background: #181a17;
   color: #f5f2eb;
@@ -1444,6 +1558,56 @@ a.course-roadmap__lesson:hover {
   opacity: 0.75;
 }
 
+.course-mod-selector {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 0.9rem;
+  background: var(--rp-c-bg-soft);
+}
+
+.course-mod-selector__positions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.course-mod-selector__position {
+  padding: 0.65rem 0;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 0.7rem;
+  background: var(--rp-c-bg);
+  color: var(--rp-c-text-1);
+  font: 700 1rem var(--rp-font-family-mono);
+  cursor: pointer;
+}
+
+.course-mod-selector__position--active {
+  border-color: var(--rp-c-brand);
+  background: var(--rp-c-brand);
+  color: var(--rp-c-bg);
+}
+
+.course-mod-selector__readout {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.7rem;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 0.75rem;
+  background: var(--rp-c-bg);
+}
+
+.course-mod-selector__readout span {
+  color: var(--rp-c-text-2);
+  font-size: 0.85rem;
+}
+
+.course-mod-selector__readout strong {
+  font-size: 1.05rem;
+}
+
 .course-mux-selector__note {
   margin: 0;
   padding: 0.7rem 0.9rem;
@@ -1452,6 +1616,65 @@ a.course-roadmap__lesson:hover {
   background: var(--rp-c-bg);
   font-size: 0.85rem;
   color: var(--rp-c-text-2);
+}
+
+.course-timeline {
+  display: grid;
+  gap: 1rem;
+}
+
+.course-timeline__row {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.course-timeline__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--rp-c-text-1);
+}
+
+.course-timeline__label code {
+  font-size: 0.8rem;
+}
+
+.course-timeline__label small {
+  color: var(--rp-c-text-2);
+}
+
+.course-timeline__track {
+  position: relative;
+  height: 1.75rem;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 0.5rem;
+  background: var(--rp-c-bg);
+  overflow: hidden;
+}
+
+.course-timeline__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--rp-c-text-2);
+  opacity: 0.6;
+}
+
+.course-timeline__track--dense .course-timeline__tick--dense {
+  background: var(--rp-c-brand);
+  opacity: 0.5;
+}
+
+.course-timeline__playhead {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--rp-c-brand);
+  box-shadow: 0 0 6px var(--rp-c-brand);
 }
 
 .course-mux-explorer {

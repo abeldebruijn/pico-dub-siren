@@ -1,0 +1,79 @@
+---
+title: Add a third dial to the switch chip
+description: Move Rate onto multiplexer channel 2 and use two Pico outputs to select Pitch, Amount or Rate through one ADC input.
+---
+
+<LessonGate prerequisite="lesson-009">
+
+Move Rate onto CH2 and use two Pico outputs to select Pitch, Amount or Rate through one ADC input. Pitch, Amount and Rate all share GP28. GP26 becomes free for a later control.
+
+## 1. Two bits select four possibilities
+
+A selector line can hold either `0` or `1`. With S0 alone, lesson 9 could select two channels. Adding S1 gives four combinations:
+
+| S2 | S1 | S0 | Channel | Control |
+| --- | --- | --- | --- | --- |
+| 0 | 0 | 0 | CH0 · pin 13 | Pitch |
+| 0 | 0 | 1 | CH1 · pin 14 | Amount |
+| 0 | 1 | 0 | CH2 · pin 15 | Rate |
+| 0 | 1 | 1 | CH3 · pin 12 | Unused |
+
+Read the selector values as the binary number `S2 S1 S0`. CH2 is binary `010`, so S1 is high while S0 and S2 are low.
+
+<MuxBitCalculator />
+
+## 2. Make two changes with USB unplugged
+
+1. Unplug the Pico's USB cable.
+2. Move the **Rate centre wiper** away from `GP26` and connect it to **4051 CH2 pin 15**.
+3. Move **4051 S1 pin 10** away from GND and connect it to `GP19`.
+4. Keep S0 pin 11 on GP18 and S2 pin 9 on GND.
+5. Keep COMMON pin 3 on GP28.
+6. Keep every potentiometer's two outside legs connected to shared 3V3 and GND.
+7. Keep the 4051 power, ENABLE, VEE and 100 nF capacitor exactly as in lesson 9.
+
+<LessonTenCircuit />
+
+:::danger Before reconnecting USB
+GP26 should now be empty. Check that Rate's centre wiper reaches pin 15—not VCC pin 16 beside it. S2 pin 9 must remain on GND.
+:::
+
+## 3. Let the channel number set S1 and S0
+
+This keeps lesson 9's scheduled reading and adds CH2:
+
+<LessonTenCodeDiff />
+
+### What the bit operations do
+
+`channel & 1` keeps only the rightmost binary bit for S0. `(channel >> 1) & 1` first shifts the next bit right, then keeps it for S1.
+
+| Channel number | Binary | S1 result | S0 result |
+| --- | --- | --- | --- |
+| 0 | 00 | 0 | 0 |
+| 1 | 01 | 0 | 1 |
+| 2 | 10 | 1 | 0 |
+
+## 4. Test all three channels independently
+
+1. Reconnect USB and run the code.
+2. Turn Pitch. Only the printed Pitch value should change.
+3. Hold Trigger and turn Amount. LED brightness should change.
+4. Keep holding Trigger and turn Rate. LED flash speed should change.
+5. Leave every knob still. The three printed values should remain stable apart from tiny changes.
+
+:::details Rate works backwards
+The two outside Rate wires are reversed. This is electrically safe. Unplug USB and swap those two outside wires; do not move the centre wiper.
+:::
+
+:::details Rate changes Amount or Pitch
+First check Rate's centre wiper goes to CH2 pin 15. Then check S1 pin 10 reaches GP19 and S0 pin 11 still reaches GP18.
+:::
+
+:::details Rate does nothing
+Unplug USB. Check that the wiper left GP26 and now reaches CH2 pin 15. Pin 15 sits directly below VCC pin 16 when the chip notch faces up.
+:::
+
+<LessonTenChecklist />
+
+</LessonGate>

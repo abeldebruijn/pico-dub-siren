@@ -1,0 +1,76 @@
+---
+title: Share one Pico input between two dials
+description: Move Amount onto multiplexer channel 1 and let GP18 choose between Pitch and Amount through one ADC input.
+---
+
+<LessonGate prerequisite="lesson-007">
+
+Lesson 7 used the CD74HC4051 as a fixed wire: CH0 was always selected. Today one Pico output controls the lowest selector bit, `S0`. Pitch and Amount now share GP28, and the Pico switches between them in software.
+
+## 1. The new idea
+
+| S2 | S1 | S0 | Connected channel | Reads |
+| --- | --- | --- | --- | --- |
+| 0 | 0 | 0 | CH0 · pin 13 | Pitch |
+| 0 | 0 | 1 | CH1 · pin 14 | Amount |
+
+`S1` and `S2` stay grounded, so only CH0 and CH1 are reachable. That keeps this lesson small.
+
+## 2. Rewire with USB unplugged
+
+1. Keep the 4051 power from lesson 7: pin 16 to 3V3, pin 8 to GND, pin 7 to GND, pin 6 to GND, capacitor between pin 16 and pin 8.
+2. Keep the Pitch centre wiper on **CH0 pin 13**.
+3. Move the Amount centre wiper away from `GP27` and connect it to **CH1 pin 14**.
+4. Keep both outside pins of the Amount pot on shared 3V3 and GND.
+5. Keep 4051 COMMON pin 3 connected to `GP28`.
+6. Move **S0 pin 11** away from GND and connect it to `GP18`.
+7. Keep **S1 pin 10** and **S2 pin 9** connected to GND.
+
+<LessonEightCircuit />
+
+Only the centre-wiper wires move through the 4051. The outside pot wires still make the 0–3.3 V range.
+
+:::danger Before USB
+Do not leave S0 floating. It must go to GP18. S1 and S2 must stay on GND. GP27 should now be empty; it is no longer reading Amount directly.
+:::
+
+## 3. Read one channel, then the other
+
+<LessonEightCodeDiff />
+
+### Why the tiny sleep exists
+
+After `mux_s0.value(channel)`, the 4051 changes its internal switch. The Pico ADC input then needs a very short moment to settle to the newly selected pot voltage. `sleep(0.002)` is 2 ms; slow for a computer, but very fast for your hand turning a knob.
+
+### Values are read directly, no smoothing
+
+Lesson 7 already removed the exponential low-pass filter once the 100 nF bypass capacitor across the 4051's VCC/GND absorbed the ADC noise it used to hide. That capacitor is still on the breadboard, so every pot value in this lesson—Pitch and the new Amount—is assigned straight from `read_mux(...)` with no `+= (reading - value) * 0.1` averaging anywhere.
+
+## 4. Test independence
+
+1. Turn Pitch. The printed `Pitch` number should change. LED brightness should not.
+2. Hold Trigger and turn Amount. LED brightness should change. Printed Pitch should stay nearly fixed.
+3. Turn Rate. LED flash speed should change. Pitch and Amount should not swap roles.
+4. Shake the breadboard lightly. Values should remain stable like your fixed lesson 7 circuit.
+
+:::info Timing observation
+Reading the mux makes the loop slower. Each loop reads two mux channels, and each read waits 2 ms for the ADC value to settle. The bottom `sleep(0.01)` adds another 10 ms, so one loop takes at least about 14 ms before Python overhead and occasional printing.
+
+The LED does not toggle exactly every requested interval; the code only checks whether it is time to toggle once per loop. If the Rate knob asks for a 50 ms interval, the next check may happen around 56–64 ms instead.
+:::
+
+:::details Pitch and Amount are swapped
+Unplug USB. Exchange only the two wiper wires going to CH0 pin 13 and CH1 pin 14.
+:::
+
+:::details Only Pitch works
+Unplug USB. Recheck Amount's centre wiper to CH1 pin 14. Also check S0 pin 11 reaches GP18, not GND.
+:::
+
+:::details Values jump when untouched
+Unplug USB and reseat the relevant wiper wire. Large jumps are still usually contact problems. Small one- or two-step changes are normal ADC noise.
+:::
+
+<LessonEightChecklist />
+
+</LessonGate>

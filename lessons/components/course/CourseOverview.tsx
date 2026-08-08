@@ -1,5 +1,21 @@
 import { Check, LockKeyhole, RotateCcw } from "lucide-react";
-import { docsBase, lessonFiveDoneItems, lessonFourDoneItems, lessonOneDoneItems, lessonSixDoneItems, lessonThreeDoneItems, lessonTwoDoneItems, lessons, lessonSlug } from "./courseData";
+import {
+  docsBase,
+  lessonEightDoneItems,
+  lessonElevenDoneItems,
+  lessonFiveDoneItems,
+  lessonFourDoneItems,
+  lessonNineDoneItems,
+  lessonOneDoneItems,
+  lessonSevenDoneItems,
+  lessonSixDoneItems,
+  lessonTenDoneItems,
+  lessonThreeDoneItems,
+  lessonTwelveDoneItems,
+  lessonTwoDoneItems,
+  lessons,
+  lessonSlug,
+} from "./courseData";
 import { clearProgress, isLessonDone, useCourseProgress } from "./progress";
 
 export default function CourseOverview() {
@@ -10,6 +26,12 @@ export default function CourseOverview() {
   const lessonFourDone = isLessonDone(progress, "lesson-004", lessonFourDoneItems.map(({ id }) => id));
   const lessonFiveDone = isLessonDone(progress, "lesson-005", lessonFiveDoneItems.map(({ id }) => id));
   const lessonSixDone = isLessonDone(progress, "lesson-006", lessonSixDoneItems.map(({ id }) => id));
+  const lessonSevenDone = isLessonDone(progress, "lesson-007", lessonSevenDoneItems.map(({ id }) => id));
+  const lessonEightDone = isLessonDone(progress, "lesson-008", lessonEightDoneItems.map(({ id }) => id));
+  const lessonNineDone = isLessonDone(progress, "lesson-009", lessonNineDoneItems.map(({ id }) => id));
+  const lessonTenDone = isLessonDone(progress, "lesson-010", lessonTenDoneItems.map(({ id }) => id));
+  const lessonElevenDone = isLessonDone(progress, "lesson-011", lessonElevenDoneItems.map(({ id }) => id));
+  const lessonTwelveDone = isLessonDone(progress, "lesson-012", lessonTwelveDoneItems.map(({ id }) => id));
 
   return (
     <section className="course-roadmap" aria-label="Course lessons">
@@ -30,9 +52,9 @@ export default function CourseOverview() {
         {lessons.map(([title, subtitle], index) => {
           const number = index + 1;
           const slug = lessonSlug(number);
-          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone) || (number === 5 && lessonFiveDone) || (number === 6 && lessonSixDone);
-          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone) || (number === 6 && lessonFiveDone) || (number === 7 && lessonSixDone);
-          const contentReady = number <= 7;
+          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone) || (number === 5 && lessonFiveDone) || (number === 6 && lessonSixDone) || (number === 7 && lessonSevenDone) || (number === 8 && lessonEightDone) || (number === 9 && lessonNineDone) || (number === 10 && lessonTenDone) || (number === 11 && lessonElevenDone) || (number === 12 && lessonTwelveDone);
+          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone) || (number === 6 && lessonFiveDone) || (number === 7 && lessonSixDone) || (number === 8 && lessonSevenDone) || (number === 9 && lessonEightDone) || (number === 10 && lessonNineDone) || (number === 11 && lessonTenDone) || (number === 12 && lessonElevenDone);
+          const contentReady = number <= 12;
           const state = done ? "done" : available && contentReady ? "available" : "locked";
           const content = (
             <>
