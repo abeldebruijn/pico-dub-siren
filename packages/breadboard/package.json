@@ -12,6 +12,9 @@
       "import": "./dist/index.js"
     }
   },
+  "bin": {
+    "breadboard": "./dist/cli/index.js"
+  },
   "files": [
     "dist"
   ],
@@ -25,6 +28,7 @@
     "chevrotain": "13.2.0"
   },
   "devDependencies": {
+    "@types/node": "^26.1.1",
     "typescript": "^5.7.2"
   }
 }

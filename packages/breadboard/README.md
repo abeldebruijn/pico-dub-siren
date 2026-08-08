@@ -47,7 +47,27 @@ pnpm --filter @dub-siren/breadboard generate:grammar
 
 The generated railroad document is checked for freshness by the test command. Regenerate it only when the executable grammar changes.
 
-This package is workspace-private. CLI and npm publication are intentionally out of scope.
+This package is workspace-private. npm publication is intentionally out of scope.
+
+## CLI
+
+After building, a `breadboard` executable is available at `dist/cli/index.js`. Any workspace package that depends on `@dub-siren/breadboard` gets it linked into `node_modules/.bin/breadboard`; otherwise run it directly with Node:
+
+```sh
+pnpm --filter @dub-siren/breadboard build
+node packages/breadboard/dist/cli/index.js <file.bd>
+```
+
+It compiles a `.bd` file (or `--text "<source>"`, or `-` for stdin), prints diagnostics with a one-line fix for each, and can emit the rendered SVG, Surface AST, or Canonical Breadboard Model:
+
+```sh
+breadboard diagram.bd --svg out/diagram.svg --model out/model.json
+breadboard diagram.bd --suppress route.overlap,connection.duplicate
+breadboard --explain component.polarity-warning
+breadboard --help
+```
+
+Warnings (but not errors) can be suppressed by diagnostic code with `--suppress`. Run `breadboard --list-codes` for every documented diagnostic code, or `breadboard --explain <code>` for its cause and fix. See `breadboard --help` for the full option list.
 
 ## Editor integration
 
