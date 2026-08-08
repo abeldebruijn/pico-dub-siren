@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "pico-dub-siren-lessons", "run", "dev"],
       "port": 3102
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "dub-siren-v3-site", "run", "dev"],
+      "port": 5173
     }
   ]
 }

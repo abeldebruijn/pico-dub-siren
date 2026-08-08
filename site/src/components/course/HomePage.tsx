@@ -104,7 +104,7 @@ export function HomePage() {
       <section className="relative mx-auto max-w-5xl px-6 pb-28">
         <div className="rainbow-marks mx-auto mb-24" aria-hidden="true" />
         <div className="mb-14">
-          <h2 className="mt-1 text-5xl font-black tracking-[-0.04em] text-slate-100 md:text-7xl">Fourteen small circuits</h2>
+          <h2 className="mt-1 text-5xl font-black tracking-[-0.04em] text-slate-100 md:text-7xl">Fifteen small circuits</h2>
           <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-300">
             Think of each lesson as one patch cable in the final instrument.
           </p>
