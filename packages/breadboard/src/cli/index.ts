@@ -74,7 +74,7 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
 
   const next = (flag: string, index: number): string => {
     const value = argv[index + 1];
-    if (value === undefined) {
+    if (value === undefined || value.startsWith("-")) {
       throw new UsageError(`Missing value for ${flag}`);
     }
     return value;
@@ -275,6 +275,16 @@ async function main(argv: readonly string[]): Promise<number> {
     return 2;
   }
 
+  const astToStdout = args.astPath === null;
+  const modelToStdout = args.modelPath === null;
+  if (astToStdout && modelToStdout) {
+    process.stderr.write(
+      `Cannot print both --ast and --model to stdout at once; give at least one an output path.\n`,
+    );
+    return 2;
+  }
+  const dataToStdout = astToStdout || modelToStdout;
+
   let source: string;
   try {
     source =
@@ -292,16 +302,32 @@ async function main(argv: readonly string[]): Promise<number> {
   const result = compile(source);
   const diagnostics = suppressDiagnostics(result.diagnostics, args.suppress);
 
+  // Reserve stdout for the requested AST/model JSON document when one is
+  // printed without a path; diagnostics move to stderr so stdout stays a
+  // single valid JSON document.
+  const diagnosticsStream = dataToStdout ? process.stderr : process.stdout;
   if (args.json) {
-    process.stdout.write(
+    diagnosticsStream.write(
       `${JSON.stringify({ status: result.status, diagnostics }, null, 2)}\n`,
     );
   } else {
     for (const diagnostic of diagnostics) {
-      process.stdout.write(`${formatDiagnostic(diagnostic, args.color)}\n`);
+      diagnosticsStream.write(`${formatDiagnostic(diagnostic, args.color)}\n`);
     }
     if (diagnostics.length === 0) {
-      process.stdout.write(paint(args.color, "32", "No errors or warnings.\n"));
+      diagnosticsStream.write(paint(args.color, "32", "No errors or warnings.\n"));
+    }
+  }
+
+  // The Surface AST is available regardless of status, so honour --ast
+  // even for invalid or unsupported input. The Canonical Model and SVG
+  // only exist for valid results.
+  if (args.astPath !== undefined) {
+    const content = `${JSON.stringify(result.ast, null, 2)}\n`;
+    if (args.astPath === null) {
+      process.stdout.write(content);
+    } else {
+      await writeOutput(args.astPath, content);
     }
   }
 
@@ -312,15 +338,6 @@ async function main(argv: readonly string[]): Promise<number> {
 
   if (result.status === "invalid") {
     return 1;
-  }
-
-  if (args.astPath !== undefined) {
-    const content = `${JSON.stringify(result.ast, null, 2)}\n`;
-    if (args.astPath === null) {
-      process.stdout.write(content);
-    } else {
-      await writeOutput(args.astPath, content);
-    }
   }
 
   if (args.modelPath !== undefined) {
